@@ -4,18 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Roam.io</title>
-    <style>
-
-        /* Sets size of the map */
-
-        #map {
-            height: 100vh;
-            width: 100%;
-        }
-    </style>
+    <!-- link to the CSS file--> 
+    <link rel="stylesheet" href="style.css">
+    
 </head>
 <body>
-    <h1>ROAM.IO</h1>
+    <!--Navigation bar-->
+    <nav>
+        <ul class = "navbar"> 
+            <li>
+                <a href = "index.html">Home</a>
+            </li>
+
+            <li>
+                <a href = "second-page.html">Your Profile</a>
+            </li>
+
+            <li>
+                <a href = "third-page.html">Map</a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- title of app and what the description is-->
+    <h1 id = "main-title">ROAM.IO</h1>
+    <p id = "welcome-message">A travel app to review all the places ever</p>
+    <div class ="images">
+        <!--add images-->
+
+    </div>
+
+    
+
+
+
     <div id="map"></div>
     
     <!-- Loads API -->
