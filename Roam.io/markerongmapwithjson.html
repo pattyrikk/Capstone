@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Google Maps App with Markers and JSON</title>
+	<link rel="stylesheet" href="https://www.veuzz.com/css/veuzz.css">
+	<style>
+		#map {
+			height: 100vh; /* Set the map height to fill the viewport */
+			width: 100%; /* Set the map width to fill the viewport */
+		}
+	</style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+	var map;
+	var nocenter = 1; // Flag to center the map only once
+	var markersData = []; // Array to store marker information
+	var orderNumber = 0; // Initial order number
+
+	function initMap() {
+		map = new google.maps.Map(document.getElementById('map'), {
+			center: {lat: 0, lng: 0},
+			zoom: 8
+		});
+
+		// Try HTML5 geolocation.
+		if (navigator.geolocation) {
+			navigator.geolocation.getCurrentPosition(
+				function(position) {
+					var pos = {
+						lat: position.coords.latitude,
+						lng: position.coords.longitude
+					};
+
+					if (nocenter === 1) {
+						map.setCenter(pos);
+						nocenter = 0;
+					}
+
+					// Place a marker at the user's current location
+					placeMarker(pos, map, 'Your Location', 'Current Coordinates: ' + pos.lat + ', ' + pos.lng);
+
+					// Add the original marker to the array
+					markersData.push({
+						order: orderNumber,
+						coordinates: pos
+					});
+
+					// Increment order number for future markers
+					orderNumber++;
+				},
+				function(error) {
+					handleLocationError(error, map);
+				}
+			);
+		} else {
+			// Browser doesn't support Geolocation
+			handleLocationError({ code: 2 }, map);
+		}
+
+		// Add a click event listener to the map to drop a marker when clicked
+		google.maps.event.addListener(map, 'click', function(event) {
+			var clickedLocation = event.latLng;
+
+			// Place a marker at the clicked location
+			var markerTitle = 'Marker ' + orderNumber;
+			var markerContent = 'Coordinates: ' + clickedLocation.lat() + ', ' + clickedLocation.lng();
+
+			placeMarker(clickedLocation, map, markerTitle, markerContent);
+
+			// Add marker information to the array
+			markersData.push({
+				order: orderNumber,
+				coordinates: clickedLocation.toJSON()
+			});
+
+			// Increment order number for future markers
+			orderNumber++;
+
+			// Update JSON file
+			updateJsonFile(markersData);
+
+			// Display the JSON file content
+			alert(JSON.stringify(markersData, null, 2));
+		});
+	}
+
+	function placeMarker(location, map, title, content) {
+		var marker = new google.maps.Marker({
+			position: location,
+			map: map,
+			title: title,
+			icon: 'pin_historic sites.png' // Path to your marker image
+		});
+
+		var infowindow = new google.maps.InfoWindow({
+			content: content
+		});
+
+		marker.addListener('click', function() {
+			infowindow.open(map, marker);
+		});
+	}
+
+	function handleLocationError(error, map) {
+		var errorMessage = 'Error: ';
+
+		switch (error.code) {
+			case 1:
+				errorMessage += 'Permission denied.';
+				break;
+			case 2:
+				errorMessage += 'Location unavailable.';
+				break;
+			case 3:
+				errorMessage += 'Timeout reached.';
+				break;
+			default:
+				errorMessage += 'Unknown error.';
+				break;
+		}
+
+		var infoWindow = new google.maps.InfoWindow({ map: map });
+		infoWindow.setPosition(map.getCenter());
+		infoWindow.setContent(errorMessage);
+	}
+
+	// Function to update the JSON file
+	function updateJsonFile(data) {
+		// Convert the data to a JSON string
+		var jsonData = JSON.stringify(data, null, 2);
+
+		// Display the JSON data in the console (you can remove this line)
+		console.log(jsonData);
+
+		// In a real application, you might want to send the JSON data to a server and update a file
+		// Here, we are just logging the JSON data to the console for demonstration purposes
+	}
+</script>
+
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Ep4rBtq2tecPJgVqHYS9vt6vKwFLFuE&callback=initMap" async defer></script>
+
+</body>
+</html>
