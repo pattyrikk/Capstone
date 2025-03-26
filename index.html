@@ -3,45 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roam.io</title>
-    <!-- link to the CSS file--> 
+    <title>Roam.io - Explore the World</title>
     <link rel="stylesheet" href="style.css">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!--Navigation bar-->
+    <!-- Navigation bar -->
     <nav>
-        <ul class = "navbar"> 
-            <li>
-                <a href = "index.html">Home</a>
-            </li>
-
-            <li>
-                <a href = "second-page.html">Your Profile</a>
-            </li>
-
-            <li>
-                <a href = "third-page.html">Map</a>
-            </li>
+        <div class="logo">ROAM.IO</div>
+        <ul class="navbar">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="userLogin.html">Login</a></li>
+            <li><a href="JsonGMData.html">Map</a></li>
         </ul>
     </nav>
 
-    <!-- title of app and what the description is-->
-    <h1 id = "main-title">ROAM.IO</h1>
-    <p id = "welcome-message">A travel app to review all the places ever</p>
-    <div class ="images">
-        <!--add images-->
+    <!-- Hero section -->
+    <header class="hero">
+        <h1>Discover the World with Roam.io</h1>
+        <p>Your personal travel companion to review and explore amazing places.</p>
+        <a href="JsonGMData.html" class="btn">Explore the Map</a>
+    </header>
 
-    </div>
+    <!-- Image gallery -->
+    <section class="image-gallery">
+        <div class="image"></div>
+        <div class="image"></div>
+        <div class="image"></div>
+    </section>
 
-    
-
-
-
+    <!-- Map container -->
     <div id="map"></div>
-    
-    <!-- Loads API -->
 
+    <!-- Google Maps API -->
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Ep4rBtq2tecPJgVqHYS9vt6vKwFLFuE&callback=initMap" async defer></script>
     <script src="script.js"></script>
 </body>
