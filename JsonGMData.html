@@ -4,7 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Map Markers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+
     <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+             margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+         }
+
+        /* Navigation Bar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.7);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff; 
+        }
+
+        .navbar {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .navbar li {
+            display: inline;
+        }
+        
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 10px 15px;
+            transition: 0.3s;
+        }
+        .navbar a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -50,7 +95,18 @@
     </style>
 </head>
 <body>
-    <div id="map" style="height: 500px; width: 100%;"></div>
+    <nav>
+        <div class="logo">ROAM.IO</div>
+        <ul class="navbar">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="userLogin.html">Login</a></li>
+            <li><a href="userProfile.html">Profile</a></li>
+        </ul>
+    </nav>
+    
+    <script src="auth.js"></script>
+
+    <div id="map" style="height: 750px; width: 100%;"></div>
 
     <div class="overlay" id="overlay"></div>
     <div class="modal" id="modal">

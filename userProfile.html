@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="Style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        .profile-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+        
+        .profile-card {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 300px;
+        }
+
+        .profile-pic {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #ddd;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: black;
+            margin: 0 auto 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: #ff6f61;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #ff3b2f;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">ROAM.IO</div>
+        <ul class="navbar">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="JsonGMData.html">Map</a></li>
+            <li><a href="#" id="logoutBtn">Logout</a></li>
+        </ul>
+    </nav>
+    
+    <script src="auth.js"></script>
+
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-pic" id="profilePic">Profile Pic</div>
+            <h2 id="userNameDisplay">User Name</h2>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+            if (currentUser) {
+                document.getElementById("userNameDisplay").innerText = currentUser.userName;
+            } else {
+                window.location.href = "userLogin.html";
+            }
+
+            document.getElementById("logoutBtn").addEventListener("click", () => {
+                localStorage.removeItem("currentUser");
+                alert("Logged out successfully!");
+                window.location.href = "index.html";
+            });
+        });
+    </script>
+</body>
+</html>
