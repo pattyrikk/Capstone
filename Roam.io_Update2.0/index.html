@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roam.io - Explore the World</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation bar -->
+    <nav>
+        <div class="logo">ROAM.IO</div>
+        <ul class="navbar" id="navbar">
+            <!-- Links will be dynamically inserted here -->
+        </ul>
+    </nav>
+
+    <!-- Hero section -->
+    <header class="hero">
+        <h1>Discover the World with Roam.io</h1>
+        <p>Your personal travel companion to review and explore amazing places.</p>
+        <a href="JsonGMData.html" class="btn">Explore the Map</a>
+    </header>
+
+    <!-- Image gallery with reviews -->
+    <section class="image-gallery">
+        <div class="image-container">
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"Amazing place! The food was fantastic and the ambiance perfect!" - John D.</p>
+            </div>
+            <div class="image" style="background-image: url('hotel1.jpg');"></div>
+        </div>
+
+        <div class="image-container">
+            <div class="review-card">
+                <div class="review-stars">★★★★☆</div>
+                <p class="review-text">"Great service, but a bit pricey. Still worth it!" - Sarah W.</p>
+            </div>
+            <div class="image" style="background-image: url('restaurant1.jpg');"></div>
+        </div>
+
+        <div class="image-container">
+            <div class="review-card">
+                <div class="review-stars">★★★★★</div>
+                <p class="review-text">"Best hotel experience I've had in years!" - Alex P.</p>
+            </div>
+            <div class="image" style="background-image: url('hotel2.jpg');"></div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about">
+        <h2>About Roam.io</h2>
+        <p>Roam.io is your personal travel companion, helping you connect with friends and review amazing places around the world. Whether you're searching for the best restaurants, hotels, or hidden gems, we've got you covered.</p>
+        <p1>Developed by Patrick Nicholson, Paul Lopresti, Aswini Subramanian, Raj Darji, and Samuel Webster.</p1>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const navbar = document.getElementById("navbar");
+
+            // Get username from localStorage
+            const username = localStorage.getItem("username");
+
+            if (username) {
+                // If user is logged in, show their name and logout option
+                navbar.innerHTML = `
+                    <li>Welcome, ${username}!</li>
+                    <li><a href="#" id="logoutBtn">Logout</a></li>
+                    <li><a href="JsonGMData.html">Map</a></li>
+                `;
+
+                // Logout event
+                document.getElementById("logoutBtn").addEventListener("click", function () {
+                    localStorage.removeItem("username"); // Remove username from localStorage
+                    window.location.reload(); // Reload page to update navbar
+                });
+            } else {
+                // If no user is logged in, show the Login option
+                navbar.innerHTML = `
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="userLogin.html">Login</a></li>
+                    <li><a href="JsonGMData.html">Map</a></li>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
