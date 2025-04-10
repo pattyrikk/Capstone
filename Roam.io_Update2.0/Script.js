@@ -1,29 +1,35 @@
 // Initialize and add the map
 function initMap() {
+    // Check if we're on the JsonGMData.html page
+    const mapElement = document.getElementById("map");
+    if (!mapElement) {
+        console.log("Map element not found, skipping map initialization");
+        return;
+    }
     
     // The location of the center point (coords are for Rowan :D)
-
     const location = { lat: 39.7065, lng: -75.1177 };
-    const location2 = { lat: 40.1234, lng: -76.1782 };
     
     // The map
-
-    const map = new google.maps.Map(document.getElementById("map"), {
+    const map = new google.maps.Map(mapElement, {
         zoom: 10,
         center: location,
     });
     
-    // The marker
+    // Only add default markers if we're not on the JsonGMData.html page
+    if (!window.location.pathname.includes("JsonGMData.html")) {
+        // The marker
+        const marker = new google.maps.Marker({
+            position: location,
+            map: map,
+        });
 
-    const marker = new google.maps.Marker({
-        position: location,
-        map: map,
-    });
-
-    const marker1 = new google.maps.Marker({
-        position: location2,
-        map: map,
-    });
+        const location2 = { lat: 40.1234, lng: -76.1782 };
+        const marker1 = new google.maps.Marker({
+            position: location2,
+            map: map,
+        });
+    }
 }
 
 document.addEventListener("DOMContentLoaded", function () {

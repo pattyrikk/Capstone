@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Map Markers</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Ep4rBtq2tecPJgVqHYS9vt6vKwFLFuE" async defer></script>
+    <script src="auth.js"></script>
 
     <style>
         body {
@@ -33,6 +34,7 @@
             list-style: none;
             display: flex;
             gap: 20px;
+            align-items: center;
         }
 
         .navbar li {
@@ -46,9 +48,79 @@
             padding: 10px 15px;
             transition: 0.3s;
         }
+        
+        .navbar span {
+            color: white;
+            font-weight: 500;
+            padding: 10px 15px;
+        }
+        
         .navbar a:hover {
             background: rgba(255, 255, 255, 0.2);
             border-radius: 5px;
+        }
+
+        /* Search bar styles */
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .search-container input {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 200px;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .search-container input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .search-container button {
+            background: none;
+            border: none;
+            color: white;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        
+        /* Search results dropdown */
+        .search-results {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            width: 250px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .search-results.active {
+            display: block;
+        }
+        
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+        
+        .search-result-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
         }
 
         .modal {
@@ -93,54 +165,147 @@
             max-width: 200px;
             margin-top: 10px;
         }
+        
+        /* Star Rating Styles */
+        .rating-container {
+            margin: 15px 0;
+        }
+        
+        .rating-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+        }
+        
+        .star-rating input {
+            display: none;
+        }
+        
+        .star-rating label {
+            cursor: pointer;
+            font-size: 25px;
+            color: #ddd;
+            padding: 0 2px;
+        }
+        
+        .star-rating label:hover,
+        .star-rating label:hover ~ label,
+        .star-rating input:checked ~ label {
+            color: #ffcc00;
+        }
+        
+        .star-rating .star {
+            transition: color 0.2s;
+        }
     </style>
 </head>
 <body>
     <nav>
         <div class="logo">ROAM.IO</div>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search users...">
+            <button id="searchButton">🔍</button>
+            <div id="searchResults" class="search-results"></div>
+        </div>
         <ul class="navbar">
             <li><a href="index.html">Home</a></li>
-            <li><a href="userLogin.html">Login</a></li>
-            <li><a href="userProfile.html">Profile</a></li>
+            <li id="profileLinkContainer"><a href="userProfile.html?username=" id="profileLink">Profile</a></li>
+            <li id="loginStatus"></li>
         </ul>
     </nav>
     
-    <script src="auth.js"></script>
-
-    <div id="map" style="height: 750px; width: 100%;"></div>
-
-    <div class="overlay" id="overlay"></div>
-    <div class="modal" id="modal">
-        <div class="modal-header">Add Location Details</div>
-        <div>
-            <p><strong>Coordinates:</strong> <span id="coordinates"></span></p>
-            <p><strong>City:</strong> <span id="city"></span></p>
-            <p><strong>State:</strong> <span id="state"></span></p>
-            <label for="about">About:</label><br>
-            <textarea id="about" rows="4" style="width: 100%;"></textarea><br>
-            <label for="imageInput">Image:</label><br>
-            <input type="file" id="imageInput" accept="image/*" onchange="previewImage()">
-            <p id="uploadStatus"></p>
-            <img id="imagePreview" style="display: none;" alt="Image Preview">
-            <button onclick="uploadImage()">Upload Image</button>
-        </div>
-        <div class="modal-footer">
-            <button id="cancel" onclick="toggleModal(false)">Cancel</button>
-            <button id="save" onclick="saveMarker()">Save</button>
-            <button id="delete" onclick="deleteMarker()" style="display: none;">Delete</button>
-        </div>
-    </div>
-
-    <script src="getJSONGMData.js"></script>
-    <script src="putJSONGMData.js"></script>
     <script>
         let map, markers = [], locations = [];
         let clickedLatLng = null;
         let selectedMarker = null; // To store the currently selected marker for deletion
         const jsonBinKey = "$2a$10$Eloirc.5zAGMcqIlouqpveZLaxBPSb0M1PwM3dcMimW1XcZVXsf9m";  // Replace with your JSONBin API Key
         const jsonBinURL = "https://api.jsonbin.io/v3/b/67e3ab658a456b79667ce33a"; // Replace with your JSONBin URL
+        let currentUser = localStorage.getItem("username"); // Get the current logged-in user
+        let uploadedImageUrl = ""; // Variable to store the uploaded image URL
+        let viewedUser = null; // Variable to store the user being viewed
+
+        // Update navigation bar based on login status
+        function updateNavigation() {
+            const loginStatus = document.getElementById('loginStatus');
+            const profileLinkContainer = document.getElementById('profileLinkContainer');
+            
+            if (currentUser) {
+                loginStatus.innerHTML = `
+                    <span style="color: white;">Welcome, ${currentUser}!</span>
+                    <a href="#" id="logoutBtn">Logout</a>
+                `;
+                document.getElementById('logoutBtn').addEventListener('click', function(e) {
+                    e.preventDefault();
+                    localStorage.removeItem('username');
+                    window.location.reload();
+                });
+                
+                // Update profile link with current username
+                const profileLink = document.getElementById('profileLink');
+                profileLink.href = `userProfile.html?username=${encodeURIComponent(currentUser)}`;
+                
+                // Hide profile link if viewing a user's profile
+                if (viewedUser) {
+                    profileLinkContainer.style.display = 'none';
+                } else {
+                    profileLinkContainer.style.display = 'inline';
+                }
+            } else {
+                loginStatus.innerHTML = '<a href="userLogin.html">Login</a>';
+                profileLinkContainer.style.display = 'none';
+            }
+        }
+
+        // Call updateNavigation when the page loads
+        document.addEventListener('DOMContentLoaded', updateNavigation);
+
+        // Check if a username is provided in the URL
+        function checkUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            viewedUser = urlParams.get('username');
+            
+            if (viewedUser) {
+                // If viewing another user's profile, update the page title
+                document.title = `${viewedUser}'s Map - Roam.io`;
+                // Show a message indicating whose pins are being viewed
+                const mapContainer = document.getElementById("map");
+                const userInfo = document.createElement("div");
+                userInfo.style.position = "absolute";
+                userInfo.style.top = "80px";
+                userInfo.style.left = "20px";
+                userInfo.style.backgroundColor = "rgba(0, 0, 0, 0.7)";
+                userInfo.style.color = "white";
+                userInfo.style.padding = "10px 15px";
+                userInfo.style.borderRadius = "5px";
+                userInfo.style.zIndex = "1000";
+                userInfo.innerHTML = `Viewing ${viewedUser}'s pins`;
+                mapContainer.appendChild(userInfo);
+                
+                // Hide profile link when viewing a user's profile
+                const profileLinkContainer = document.getElementById('profileLinkContainer');
+                if (profileLinkContainer) {
+                    profileLinkContainer.style.display = 'none';
+                }
+            }
+        }
 
         function initMap() {
+            // Check if user is authenticated
+            const username = localStorage.getItem("username");
+            if (!username) {
+                console.error("User not authenticated");
+                return; // Don't initialize the map if not authenticated
+            }
+            
+            // Check URL parameters first
+            checkUrlParams();
+            
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
@@ -179,6 +344,103 @@
                 center: defaultLocation,
                 zoom: 12
             });
+        }
+
+        function loadExistingMarkers() {
+            // Fetch existing markers from JSONBin
+            fetch(jsonBinURL, {
+                headers: {
+                    "X-Master-Key": jsonBinKey
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Check if data exists and has the expected structure
+                if (data && Array.isArray(data)) {
+                    locations = data;
+                    locations.forEach(location => {
+                        if (location && location.coordinates) {
+                            // Only show pins created by the current user
+                            if (location.createdBy === currentUser) {
+                                addMarker(location);
+                            }
+                        }
+                    });
+                } else if (data && data.record && Array.isArray(data.record)) {
+                    // Handle case where data is wrapped in a record object
+                    locations = data.record;
+                    locations.forEach(location => {
+                        if (location && location.coordinates) {
+                            // If viewing a specific user's profile, only show their markers
+                            if (viewedUser) {
+                                if (location.createdBy === viewedUser) {
+                                    addMarker(location);
+                                }
+                            } else {
+                                // Otherwise, only show the current user's markers
+                                if (location.createdBy === currentUser) {
+                                    addMarker(location);
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    console.log("No existing markers found or invalid data structure");
+                    locations = []; // Initialize empty array if no valid data
+                }
+            })
+            .catch(error => {
+                console.error("Error loading existing markers:", error);
+                locations = []; // Initialize empty array on error
+            });
+        }
+
+        function addMarker(locationData) {
+            const position = {
+                lat: locationData.coordinates.lat,
+                lng: locationData.coordinates.lng
+            };
+
+            const marker = new google.maps.Marker({
+                position: position,
+                map: map,
+                title: `Location: ${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`
+            });
+
+            // Add click listener to the marker
+            marker.addListener("click", () => {
+                if (selectedMarker) {
+                    selectedMarker.setAnimation(null);
+                }
+                selectedMarker = marker;
+                marker.setAnimation(google.maps.Animation.BOUNCE);
+                document.getElementById("coordinates").textContent = `${position.lat.toFixed(6)}, ${position.lng.toFixed(6)}`;
+                document.getElementById("city").textContent = locationData.city;
+                document.getElementById("state").textContent = locationData.state;
+                document.getElementById("about").value = locationData.about;
+                
+                // Set the rating if it exists
+                if (locationData.rating) {
+                    const ratingInput = document.querySelector(`input[name="rating"][value="${locationData.rating}"]`);
+                    if (ratingInput) {
+                        ratingInput.checked = true;
+                    }
+                } else {
+                    // Clear any selected rating
+                    document.querySelectorAll('input[name="rating"]').forEach(input => {
+                        input.checked = false;
+                    });
+                }
+                
+                if (locationData.imageUrl) {
+                    const imagePreview = document.getElementById("imagePreview");
+                    imagePreview.style.display = "block";
+                    imagePreview.src = locationData.imageUrl;
+                }
+                toggleModal(true);
+            });
+
+            markers.push(marker);
         }
 
         function fetchLocationDetails(latLng) {
@@ -251,128 +513,360 @@
         }
 
         function saveMarker() {
-            if (clickedLatLng) {
+            // Get form values
+            const about = document.getElementById("about").value;
+            const city = document.getElementById("city").textContent;
+            const state = document.getElementById("state").textContent;
+            
+            // Get the selected rating
+            const ratingInput = document.querySelector('input[name="rating"]:checked');
+            const rating = ratingInput ? parseInt(ratingInput.value) : null;
+            
+            // Check if we're updating an existing marker or creating a new one
+            if (selectedMarker) {
+                console.log("Updating existing marker");
+                // Find the index of the marker in the markers array
+                const markerIndex = markers.indexOf(selectedMarker);
+                
+                if (markerIndex > -1) {
+                    console.log("Found marker at index:", markerIndex);
+                    
+                    // Check if the user owns this marker
+                    if (locations[markerIndex].createdBy !== currentUser) {
+                        alert("You can only edit your own pins.");
+                        return;
+                    }
+                    
+                    // Update the location data
+                    locations[markerIndex].about = about;
+                    locations[markerIndex].rating = rating;
+                    
+                    // Update the image URL if a new one was uploaded
+                    if (uploadedImageUrl) {
+                        locations[markerIndex].imageUrl = uploadedImageUrl;
+                    }
+                    
+                    // Save to JSONBin
+                    saveToJsonBin(locations, "Location updated successfully");
+                } else {
+                    console.error("Could not find marker in markers array");
+                    alert("Error updating location. Please try again.");
+                }
+            } else if (clickedLatLng) {
+                console.log("Creating new marker");
+                // We're creating a new marker
+                const coordinates = {
+                    lat: clickedLatLng.lat(),
+                    lng: clickedLatLng.lng()
+                };
+                
+                // Create the marker
                 const marker = new google.maps.Marker({
                     position: clickedLatLng,
                     map: map,
-                    title: `Location: ${clickedLatLng.lat().toFixed(6)}, ${clickedLatLng.lng().toFixed(6)}`
+                    title: `Location: ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`
                 });
 
-                marker.addListener('click', () => {
-                    showMarkerDetails(marker);
+                // Add click listener to the marker
+                marker.addListener("click", () => {
+                    if (selectedMarker) {
+                        selectedMarker.setAnimation(null);
+                    }
+                    selectedMarker = marker;
+                    marker.setAnimation(google.maps.Animation.BOUNCE);
+                    document.getElementById("coordinates").textContent = `${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}`;
+                    document.getElementById("city").textContent = city;
+                    document.getElementById("state").textContent = state;
+                    document.getElementById("about").value = about;
+                    
+                    // Set the rating if it exists
+                    if (rating) {
+                        const ratingInput = document.querySelector(`input[name="rating"][value="${rating}"]`);
+                        if (ratingInput) {
+                            ratingInput.checked = true;
+                        }
+                    }
+                    
+                    if (uploadedImageUrl) {
+                        const imagePreview = document.getElementById("imagePreview");
+                        imagePreview.style.display = "block";
+                        imagePreview.src = uploadedImageUrl;
+                    }
+                    toggleModal(true);
                 });
 
-                const markerData = {
-                    coordinates: clickedLatLng,
-                    city: document.getElementById("city").textContent,
-                    state: document.getElementById("state").textContent,
-                    about: document.getElementById("about").value,
-                    image: document.getElementById("imagePreview").src || "",
-                    marker: marker // Store marker instance for later deletion
+                // Create location data
+                const locationData = {
+                    coordinates: coordinates,
+                    city: city,
+                    state: state,
+                    about: about,
+                    imageUrl: uploadedImageUrl,
+                    rating: rating,
+                    createdBy: currentUser,
+                    createdAt: new Date().toISOString()
                 };
-                locations.push(markerData);
 
-                // Update JSONBin storage
-                updateJSONBin();
+                // Add to locations array
+                locations.push(locationData);
+                markers.push(marker);
 
-                // Close modal after saving the marker
-                toggleModal(false);
+                // Save to JSONBin
+                saveToJsonBin(locations, "Location saved successfully");
             } else {
-                console.log("No location selected for marker.");
+                console.error("No marker selected and no clicked location");
+                alert("Error: No location selected. Please try again.");
             }
         }
-
-        function showMarkerDetails(marker) {
-            // Find the marker data based on the clicked marker
-            selectedMarker = locations.find(location => location.marker === marker);
-
-            if (selectedMarker) {
-                document.getElementById("coordinates").textContent = `${selectedMarker.coordinates.lat().toFixed(6)}, ${selectedMarker.coordinates.lng().toFixed(6)}`;
-                document.getElementById("city").textContent = selectedMarker.city;
-                document.getElementById("state").textContent = selectedMarker.state;
-                document.getElementById("about").value = selectedMarker.about;
-                document.getElementById("imagePreview").src = selectedMarker.image;
-                document.getElementById("imagePreview").style.display = selectedMarker.image ? "block" : "none";
-
-                // Show the delete button
-                document.getElementById("delete").style.display = "inline-block";
-            }
-
-            toggleModal(true);
-        }
-
-        function deleteMarker() {
-            if (selectedMarker) {
-                selectedMarker.marker.setMap(null); // Remove the marker from the map
-                locations = locations.filter(location => location !== selectedMarker); // Remove from the locations array
-
-                // Update JSONBin after marker deletion
-                updateJSONBin();
-
-                toggleModal(false); // Close the modal
-                console.log("Marker deleted.");
-            }
-        }
-
-        function updateJSONBin() {
-            // Send a PUT request to update the JSONBin data with the updated locations
+        
+        // Helper function to save data to JSONBin
+        function saveToJsonBin(data, successMessage) {
             fetch(jsonBinURL, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                     "X-Master-Key": jsonBinKey
                 },
-                body: JSON.stringify({ locations })
+                body: JSON.stringify(data)
             })
-            .then(response => response.json())
-            .then(data => {
-                console.log("JSONBin updated:", data);
-            })
-            .catch(error => {
-                console.error("Error updating JSONBin:", error);
-            });
-        }
-
-        function loadExistingMarkers() {
-            // Example: Load previously saved markers (from JSONBin)
-            fetch(jsonBinURL, {
-                method: "GET",
-                headers: {
-                    "X-Master-Key": jsonBinKey
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to save location data");
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                locations = data.locations || [];  // Load locations from JSONBin
-                locations.forEach(location => {
-                    const marker = new google.maps.Marker({
-                        position: location.coordinates,
-                        map: map,
-                        title: `Location: ${location.coordinates.lat().toFixed(6)}, ${location.coordinates.lng().toFixed(6)}`
-                    });
-
-                    marker.addListener('click', () => {
-                        showMarkerDetails(marker);
-                    });
-                });
+                console.log(successMessage);
+                toggleModal(false);
             })
             .catch(error => {
-                console.error("Error loading markers:", error);
+                console.error("Error saving location:", error);
+                alert("Failed to save location. Please try again.");
             });
         }
 
-        function toggleModal(isVisible) {
+        function deleteMarker() {
+            if (selectedMarker) {
+                // Find the index of the marker in the markers array
+                const markerIndex = markers.indexOf(selectedMarker);
+                if (markerIndex > -1) {
+                    // Check if the user owns this marker
+                    if (locations[markerIndex].createdBy !== currentUser) {
+                        alert("You can only delete your own pins.");
+                        return;
+                    }
+                    
+                    // Remove the marker from the map
+                    selectedMarker.setMap(null);
+                    markers.splice(markerIndex, 1);
+                    
+                    // Remove the corresponding location data
+                    locations.splice(markerIndex, 1);
+                    
+                    // Update JSONBin with the new locations array
+                    fetch(jsonBinURL, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-Master-Key": jsonBinKey
+                        },
+                        body: JSON.stringify(locations)
+                    })
+                    .then(response => response.json())  // Parse the response as JSON
+                    .then(data => {
+                        console.log("Location deleted successfully");
+                        // Clear the selected marker and close the modal
+                        selectedMarker = null;
+                        toggleModal(false);
+                    })
+                    .catch(error => {
+                        console.error("Error deleting location:", error);
+                        // Even if there's an error with JSONBin, we've already removed the marker locally
+                        selectedMarker = null;
+                        toggleModal(false);
+                    });
+                }
+            }
+        }
+
+        function toggleModal(show) {
             const modal = document.getElementById("modal");
             const overlay = document.getElementById("overlay");
-            if (isVisible) {
+            const deleteButton = document.getElementById("delete");
+            
+            if (show) {
                 modal.classList.add("active");
                 overlay.classList.add("active");
+                
+                // Show delete button only if there's a selected marker AND it belongs to the current user
+                if (selectedMarker) {
+                    const markerIndex = markers.indexOf(selectedMarker);
+                    if (markerIndex > -1 && locations[markerIndex].createdBy === currentUser) {
+                        deleteButton.style.display = "inline-block";
+                    } else {
+                        deleteButton.style.display = "none";
+                    }
+                } else {
+                    deleteButton.style.display = "none";
+                }
             } else {
                 modal.classList.remove("active");
                 overlay.classList.remove("active");
+                // Clear form fields
+                document.getElementById("about").value = "";
+                document.getElementById("imageInput").value = "";
+                document.getElementById("imagePreview").style.display = "none";
+                document.getElementById("uploadStatus").textContent = "";
+                uploadedImageUrl = "";
             }
         }
+
+        // Search functionality
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById("searchInput");
+            const searchButton = document.getElementById("searchButton");
+            const searchResults = document.getElementById("searchResults");
+            const profileLink = document.getElementById("profileLink");
+
+            // Update profile link with current username if logged in
+            if (currentUser) {
+                profileLink.href = `userProfile.html?username=${encodeURIComponent(currentUser)}`;
+            }
+
+            searchButton.addEventListener("click", function() {
+                performSearch();
+            });
+
+            searchInput.addEventListener("keyup", function(event) {
+                if (event.key === "Enter") {
+                    performSearch();
+                }
+            });
+
+            // Close search results when clicking outside
+            document.addEventListener("click", function(event) {
+                if (!searchInput.contains(event.target) && !searchButton.contains(event.target) && !searchResults.contains(event.target)) {
+                    searchResults.classList.remove("active");
+                }
+            });
+
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm.length < 2) {
+                    searchResults.classList.remove("active");
+                    return;
+                }
+
+                // Fetch users from JSONBin
+                fetch(jsonBinURL, {
+                    headers: {
+                        "X-Master-Key": jsonBinKey
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Process the data to extract unique usernames
+                    let users = [];
+                    if (data && data.record) {
+                        const locations = data.record;
+                        const uniqueUsers = new Set();
+                        
+                        locations.forEach(location => {
+                            if (location.createdBy && !uniqueUsers.has(location.createdBy)) {
+                                uniqueUsers.add(location.createdBy);
+                                users.push(location.createdBy);
+                            }
+                        });
+                    }
+                    
+                    // Filter users based on search term
+                    const filteredUsers = users.filter(user => 
+                        user.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                    
+                    // Display search results
+                    displaySearchResults(filteredUsers);
+                })
+                .catch(error => {
+                    console.error("Error fetching users:", error);
+                    searchResults.innerHTML = "<div class='search-result-item'>Error loading users</div>";
+                    searchResults.classList.add("active");
+                });
+            }
+
+            function displaySearchResults(users) {
+                if (users.length === 0) {
+                    searchResults.innerHTML = "<div class='search-result-item'>No users found</div>";
+                } else {
+                    searchResults.innerHTML = "";
+                    users.forEach(user => {
+                        const userElement = document.createElement("div");
+                        userElement.className = "search-result-item";
+                        userElement.textContent = user;
+                        userElement.addEventListener("click", function() {
+                            // Navigate to user profile
+                            window.location.href = `userProfile.html?username=${encodeURIComponent(user)}`;
+                        });
+                        searchResults.appendChild(userElement);
+                    });
+                }
+                searchResults.classList.add("active");
+            }
+        });
+
+        // Add this at the end of your script section
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check if user is authenticated
+            const username = localStorage.getItem("username");
+            if (username) {
+                // Wait for Google Maps API to load
+                const checkGoogleMapsLoaded = setInterval(function() {
+                    if (typeof google !== 'undefined') {
+                        clearInterval(checkGoogleMapsLoaded);
+                        console.log("Google Maps API loaded, initializing map");
+                        initMap();
+                    }
+                }, 100);
+            }
+        });
     </script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Ep4rBtq2tecPJgVqHYS9vt6vKwFLFuE&libraries=places&callback=initMap" async defer></script>
+
+    <div id="map" style="height: 750px; width: 100%;"></div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="modal" id="modal">
+        <div class="modal-header">Add Location Details</div>
+        <div>
+            <p><strong>Coordinates:</strong> <span id="coordinates"></span></p>
+            <p><strong>City:</strong> <span id="city"></span></p>
+            <p><strong>State:</strong> <span id="state"></span></p>
+            <label for="about">About:</label><br>
+            <textarea id="about" rows="4" style="width: 100%;"></textarea><br>
+            
+            <div class="rating-container">
+                <span class="rating-label">Rating:</span>
+                <div class="star-rating" id="starRating">
+                    <input type="radio" id="star5" name="rating" value="5">
+                    <label for="star5" class="star">★</label>
+                    <input type="radio" id="star4" name="rating" value="4">
+                    <label for="star4" class="star">★</label>
+                    <input type="radio" id="star3" name="rating" value="3">
+                    <label for="star3" class="star">★</label>
+                    <input type="radio" id="star2" name="rating" value="2">
+                    <label for="star2" class="star">★</label>
+                    <input type="radio" id="star1" name="rating" value="1">
+                    <label for="star1" class="star">★</label>
+                </div>
+            </div>
+            
+            <label for="imageInput">Image:</label><br>
+            <input type="file" id="imageInput" accept="image/*" onchange="previewImage()">
+            <p id="uploadStatus"></p>
+            <img id="imagePreview" style="display: none;" alt="Image Preview">
+            <button onclick="uploadImage()">Upload Image</button>
+        </div>
+        <div class="modal-footer">
+            <button id="cancel" onclick="toggleModal(false)">Cancel</button>
+            <button id="save" onclick="saveMarker()">Save</button>
+            <button id="delete" onclick="deleteMarker()" style="display: none;">Delete</button>
+        </div>
+    </div>
 </body>
 </html>

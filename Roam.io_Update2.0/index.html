@@ -6,11 +6,80 @@
     <title>Roam.io - Explore the World</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Search bar styles */
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+        
+        .search-container input {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 200px;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .search-container input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .search-container button {
+            background: none;
+            border: none;
+            color: white;
+            margin-left: 5px;
+            cursor: pointer;
+        }
+        
+        /* Search results dropdown */
+        .search-results {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            width: 250px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .search-results.active {
+            display: block;
+        }
+        
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+        
+        .search-result-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+    </style>
 </head>
 <body>
     <!-- Navigation bar -->
     <nav>
         <div class="logo">ROAM.IO</div>
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search users...">
+            <button id="searchButton">🔍</button>
+            <div id="searchResults" class="search-results"></div>
+        </div>
         <ul class="navbar" id="navbar">
             <!-- Links will be dynamically inserted here -->
         </ul>
@@ -28,7 +97,7 @@
         <div class="image-container">
             <div class="review-card">
                 <div class="review-stars">★★★★★</div>
-                <p class="review-text">"Amazing place! The food was fantastic and the ambiance perfect!" - John D.</p>
+                <p class="review-text">"Amazing place! The food was fantastic!" - John D.</p>
             </div>
             <div class="image" style="background-image: url('hotel1.jpg');"></div>
         </div>
@@ -60,6 +129,9 @@
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const navbar = document.getElementById("navbar");
+            const searchInput = document.getElementById("searchInput");
+            const searchButton = document.getElementById("searchButton");
+            const searchResults = document.getElementById("searchResults");
 
             // Get username from localStorage
             const username = localStorage.getItem("username");
@@ -68,8 +140,8 @@
                 // If user is logged in, show their name and logout option
                 navbar.innerHTML = `
                     <li>Welcome, ${username}!</li>
-                    <li><a href="#" id="logoutBtn">Logout</a></li>
                     <li><a href="JsonGMData.html">Map</a></li>
+                    <li><a href="#" id="logoutBtn">Logout</a></li>
                 `;
 
                 // Logout event
@@ -81,9 +153,110 @@
                 // If no user is logged in, show the Login option
                 navbar.innerHTML = `
                     <li><a href="index.html">Home</a></li>
-                    <li><a href="userLogin.html">Login</a></li>
                     <li><a href="JsonGMData.html">Map</a></li>
+                    <li><a href="userLogin.html">Login</a></li>
                 `;
+            }
+
+            // Search functionality
+            searchButton.addEventListener("click", function() {
+                performSearch();
+            });
+
+            searchInput.addEventListener("keyup", function(event) {
+                if (event.key === "Enter") {
+                    performSearch();
+                }
+            });
+
+            // Close search results when clicking outside
+            document.addEventListener("click", function(event) {
+                if (!searchInput.contains(event.target) && !searchButton.contains(event.target) && !searchResults.contains(event.target)) {
+                    searchResults.classList.remove("active");
+                }
+            });
+
+            function performSearch() {
+                const searchTerm = searchInput.value.trim();
+                if (searchTerm.length < 2) {
+                    searchResults.classList.remove("active");
+                    return;
+                }
+
+                // Fetch users from the correct JSONBin (users data)
+                const jsonBinKey = "$2a$10$Eloirc.5zAGMcqIlouqpveZLaxBPSb0M1PwM3dcMimW1XcZVXsf9m";
+                const jsonBinURL = "https://api.jsonbin.io/v3/b/67c8b49aacd3cb34a8f59a6b";
+
+                fetch(jsonBinURL, {
+                    headers: {
+                        "X-Master-Key": jsonBinKey
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('JSONBin response:', data); // Debug log
+                    console.log('Record data:', data.record); // Log the actual record data
+                    
+                    // Process the data to extract usernames
+                    let users = [];
+                    if (data && data.record && Array.isArray(data.record)) {
+                        const userData = data.record;
+                        console.log('User data structure:', userData[0]); // Log the structure of first user
+                        
+                        // Filter out any undefined or null usernames
+                        users = userData
+                            .filter(user => user && typeof user === 'object')
+                            .map(user => {
+                                console.log('Processing user:', user); // Log each user being processed
+                                return user.username || user.userName || user.user_name || user.name;
+                            })
+                            .filter(username => username); // Remove any null/undefined usernames
+                    } else {
+                        console.error('Unexpected data structure:', data);
+                        throw new Error('Invalid data structure received from JSONBin');
+                    }
+                    
+                    console.log('Extracted usernames:', users); // Log the extracted usernames
+                    
+                    // Filter users based on search term
+                    const filteredUsers = users.filter(user => 
+                        user && user.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                    
+                    console.log('Filtered users:', filteredUsers); // Debug log
+                    
+                    // Display search results
+                    displaySearchResults(filteredUsers);
+                })
+                .catch(error => {
+                    console.error("Error fetching users:", error);
+                    searchResults.innerHTML = `<div class='search-result-item'>Error: ${error.message}</div>`;
+                    searchResults.classList.add("active");
+                });
+            }
+
+            function displaySearchResults(users) {
+                if (users.length === 0) {
+                    searchResults.innerHTML = "<div class='search-result-item'>No users found</div>";
+                } else {
+                    searchResults.innerHTML = "";
+                    users.forEach(user => {
+                        const userElement = document.createElement("div");
+                        userElement.className = "search-result-item";
+                        userElement.textContent = user;
+                        userElement.addEventListener("click", function() {
+                            // Navigate to user profile
+                            window.location.href = `userProfile.html?username=${encodeURIComponent(user)}`;
+                        });
+                        searchResults.appendChild(userElement);
+                    });
+                }
+                searchResults.classList.add("active");
             }
         });
     </script>
