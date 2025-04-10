@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Google Map Markers</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Ep4rBtq2tecPJgVqHYS9vt6vKwFLFuE" async defer></script>
-    <script src="auth.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Ep4rBtq2tecPJgVqHYS9vt6vKwFLFuE&callback=initMap" async defer></script>
 
     <style>
         body {
@@ -296,13 +295,6 @@
         }
 
         function initMap() {
-            // Check if user is authenticated
-            const username = localStorage.getItem("username");
-            if (!username) {
-                console.error("User not authenticated");
-                return; // Don't initialize the map if not authenticated
-            }
-            
             // Check URL parameters first
             checkUrlParams();
             
@@ -360,10 +352,7 @@
                     locations = data;
                     locations.forEach(location => {
                         if (location && location.coordinates) {
-                            // Only show pins created by the current user
-                            if (location.createdBy === currentUser) {
-                                addMarker(location);
-                            }
+                            addMarker(location);
                         }
                     });
                 } else if (data && data.record && Array.isArray(data.record)) {
@@ -377,10 +366,7 @@
                                     addMarker(location);
                                 }
                             } else {
-                                // Otherwise, only show the current user's markers
-                                if (location.createdBy === currentUser) {
-                                    addMarker(location);
-                                }
+                                addMarker(location);
                             }
                         }
                     });
@@ -531,12 +517,6 @@
                 if (markerIndex > -1) {
                     console.log("Found marker at index:", markerIndex);
                     
-                    // Check if the user owns this marker
-                    if (locations[markerIndex].createdBy !== currentUser) {
-                        alert("You can only edit your own pins.");
-                        return;
-                    }
-                    
                     // Update the location data
                     locations[markerIndex].about = about;
                     locations[markerIndex].rating = rating;
@@ -647,12 +627,6 @@
                 // Find the index of the marker in the markers array
                 const markerIndex = markers.indexOf(selectedMarker);
                 if (markerIndex > -1) {
-                    // Check if the user owns this marker
-                    if (locations[markerIndex].createdBy !== currentUser) {
-                        alert("You can only delete your own pins.");
-                        return;
-                    }
-                    
                     // Remove the marker from the map
                     selectedMarker.setMap(null);
                     markers.splice(markerIndex, 1);
@@ -694,18 +668,8 @@
             if (show) {
                 modal.classList.add("active");
                 overlay.classList.add("active");
-                
-                // Show delete button only if there's a selected marker AND it belongs to the current user
-                if (selectedMarker) {
-                    const markerIndex = markers.indexOf(selectedMarker);
-                    if (markerIndex > -1 && locations[markerIndex].createdBy === currentUser) {
-                        deleteButton.style.display = "inline-block";
-                    } else {
-                        deleteButton.style.display = "none";
-                    }
-                } else {
-                    deleteButton.style.display = "none";
-                }
+                // Show delete button only if there's a selected marker
+                deleteButton.style.display = selectedMarker ? "inline-block" : "none";
             } else {
                 modal.classList.remove("active");
                 overlay.classList.remove("active");
@@ -808,22 +772,6 @@
                     });
                 }
                 searchResults.classList.add("active");
-            }
-        });
-
-        // Add this at the end of your script section
-        document.addEventListener("DOMContentLoaded", function() {
-            // Check if user is authenticated
-            const username = localStorage.getItem("username");
-            if (username) {
-                // Wait for Google Maps API to load
-                const checkGoogleMapsLoaded = setInterval(function() {
-                    if (typeof google !== 'undefined') {
-                        clearInterval(checkGoogleMapsLoaded);
-                        console.log("Google Maps API loaded, initializing map");
-                        initMap();
-                    }
-                }, 100);
             }
         });
     </script>

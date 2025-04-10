@@ -5,8 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile - Roam.io</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap" rel="stylesheet">
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Ep4rBtq2tecPJgVqHYS9vt6vKwFLFuE" async defer></script>
-    <script src="auth.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB-Ep4rBtq2tecPJgVqHYS9vt6vKwFLFuE&callback=initMap" async defer></script>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -375,13 +374,6 @@
         }
 
         function initMap() {
-            // Check if user is authenticated
-            const username = localStorage.getItem("username");
-            if (!username) {
-                console.error("User not authenticated");
-                return; // Don't initialize the map if not authenticated
-            }
-            
             // Get URL parameters first
             getUrlParams();
             
@@ -676,22 +668,6 @@
         document.addEventListener('DOMContentLoaded', function() {
             updateNavigation();
             getUrlParams();
-        });
-
-        // Add this at the end of your script section
-        document.addEventListener("DOMContentLoaded", function() {
-            // Check if user is authenticated
-            const username = localStorage.getItem("username");
-            if (username) {
-                // Wait for Google Maps API to load
-                const checkGoogleMapsLoaded = setInterval(function() {
-                    if (typeof google !== 'undefined') {
-                        clearInterval(checkGoogleMapsLoaded);
-                        console.log("Google Maps API loaded, initializing map");
-                        initMap();
-                    }
-                }, 100);
-            }
         });
     </script>
 </body>
