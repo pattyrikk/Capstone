@@ -1,9 +1,3 @@
-<!-- Name: Aswini Subramanian, Paul Lopresti, Sam Webster, Raj Darji, Patrick Nicholson
-Date: 3/27/25
-File: JsonGMDate.html
-Purpose: This is the html for the backend portion of the assignment, we see google maps, and the other features on the backend --!>
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +12,7 @@ Purpose: This is the html for the backend portion of the assignment, we see goog
             font-family: 'Poppins', sans-serif;
              margin: 0;
             padding: 0;
-            background: linear-gradient(to right, #4facfe, #00f2fe);
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
          }
 
         /* Navigation Bar */
@@ -30,9 +24,15 @@ Purpose: This is the html for the backend portion of the assignment, we see goog
             background: rgba(0, 0, 0, 0.7);
         }
         .logo {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
-            color: #fff; 
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: linear-gradient(45deg, rgb(255, 165, 0), #FFA500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); 
         }
 
         .navbar {
@@ -345,6 +345,7 @@ Purpose: This is the html for the backend portion of the assignment, we see goog
         }
 
         function loadExistingMarkers() {
+            
             // Fetch existing markers from JSONBin
             fetch(jsonBinURL, {
                 headers: {
@@ -353,37 +354,29 @@ Purpose: This is the html for the backend portion of the assignment, we see goog
             })
             .then(response => response.json())
             .then(data => {
-                // Check if data exists and has the expected structure
-                if (data && Array.isArray(data)) {
-                    locations = data;
-                    locations.forEach(location => {
-                        if (location && location.coordinates) {
-                            addMarker(location);
-                        }
-                    });
-                } else if (data && data.record && Array.isArray(data.record)) {
-                    // Handle case where data is wrapped in a record object
-                    locations = data.record;
-                    locations.forEach(location => {
-                        if (location && location.coordinates) {
-                            // If viewing a specific user's profile, only show their markers
-                            if (viewedUser) {
-                                if (location.createdBy === viewedUser) {
-                                    addMarker(location);
-                                }
-                            } else {
-                                addMarker(location);
-                            }
-                        }
-                    });
-                } else {
-                    console.log("No existing markers found or invalid data structure");
-                    locations = []; // Initialize empty array if no valid data
+                if (!currentUser) {
+                    console.log("No logged-in user found.");
+                    return;
                 }
+
+                // Check for structure and assign records accordingly
+                let markerData = [];
+                if (data && Array.isArray(data)) {
+                    markerData = data;
+                } else if (data && data.record && Array.isArray(data.record)) {
+                    markerData = data.record;
+                }
+
+                // Filter and show only markers created by the current user
+                locations = markerData.filter(location =>
+                    location && location.coordinates && location.createdBy === currentUser
+                );
+
+                locations.forEach(addMarker);
             })
             .catch(error => {
                 console.error("Error loading existing markers:", error);
-                locations = []; // Initialize empty array on error
+                locations = []; 
             });
         }
 
