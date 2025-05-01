@@ -1,7 +1,7 @@
 //Name: Aswini Subramanian, Sam Webster, Raj Darji, Paul Lopresti, Patrick Nicholson 
 //Date: 4/20/25
 //File: Script.js
-//
+//Purpose: To create the functions for the backend of the google maps api
 
 
 // Initialize and add the map
