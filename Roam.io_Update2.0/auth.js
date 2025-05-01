@@ -1,3 +1,10 @@
+//Name: Aswini Subramanian, Raj Darji, Patrick Nicholson, Sam Webster, Paul Lopresti
+//File: auth.js
+//Date: 4/20/25
+//Purpose: to authenticate the username and password for all users
+
+
+
 async function verifyAuth() {
     const username = localStorage.getItem("username");
 
