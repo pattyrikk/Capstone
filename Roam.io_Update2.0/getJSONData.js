@@ -1,3 +1,10 @@
+//Name: Aswini Subramanian, Paul Lopresti, Raj Darji, Patrick Nicholson, Sam Webster
+//File: getJSONData.js
+//Date: 4/21/25
+//Purpose: to ensure that the data will be added to the JSONBin
+
+
+
 const getJSONData = async () => {
 
 // Replace YOUR_BIN_ID with the actual ID of your bin
