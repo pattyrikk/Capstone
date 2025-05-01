@@ -1,3 +1,9 @@
+//Name: Aswini Subramanian, Sam Webster, Raj Darji, Paul Lopresti, Patrick Nicholson 
+//Date: 4/20/25
+//File: Script.js
+//
+
+
 // Initialize and add the map
 function initMap() {
     // Check if we're on the JsonGMData.html page
