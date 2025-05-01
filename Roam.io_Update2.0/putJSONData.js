@@ -1,3 +1,9 @@
+//Name: Aswini Subramanian, Raj Darji, Patrick Nicholson, Sam Webster, Paul Lopresti 
+//Date: 4/20/25
+//File: putJSONData.js
+//Purpose: communication between JSON and the Google Maps API 
+
+
 const putJSONData = async (updatedData) => {
   const binId = '67c8b49aacd3cb34a8f59a6b'; 
   const apiKey = '$2a$10$Eloirc.5zAGMcqIlouqpveZLaxBPSb0M1PwM3dcMimW1XcZVXsf9m'; 
