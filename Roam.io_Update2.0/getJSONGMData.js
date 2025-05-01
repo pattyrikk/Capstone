@@ -1,3 +1,9 @@
+//Name: Aswini Subramanian, Paul Lopresti, Raj Darji, Sam Webster, Patrick Nicholson
+//Date: 4/22/25
+//File: getJSONGMData.js
+//Purpose: code to add, fetch data from JSONBin
+
+
 const jsonBinUrl = "https://api.jsonbin.io/v3/b/67e3ab658a456b79667ce33a ";
 const apiKey = "$2a$10$Eloirc.5zAGMcqIlouqpveZLaxBPSb0M1PwM3dcMimW1XcZVXsf9m";
 
