@@ -1,3 +1,8 @@
+//Name: Aswini Subramanian, Raj Darji, Sam Webster, Patrick Nicholson, Paul Lopresti
+//File: putJSONGMData.js
+//Date: 4/20/25
+//Purpose: To make sure that the API for the google maps work and exists with the backend.
+
 async function putJSONGMData() {
     const jsonBinUrl = "https://api.jsonbin.io/v3/b/67e3ab658a456b79667ce33a ";
     const apiKey = "$2a$10$Eloirc.5zAGMcqIlouqpveZLaxBPSb0M1PwM3dcMimW1XcZVXsf9m";
